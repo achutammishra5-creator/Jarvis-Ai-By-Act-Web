@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Jarvis Assistant (Male Voice + More Jokes, News & Green Tea Info)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 255, 255, 0.2);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      color: #00fff2;
+    }
+
+    .output {
+      background-color: #111;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      font-size: 18px;
+      min-height: 60px;
+      box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      background: #222;
+      color: #fff;
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      background: #00adb5;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background: #007d8f;
+    }
+
+    #mainContent {
+      display: none;
+    }
+
+    
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div id="loginContent">
+      <h1>🔐 लॉगिन करें</h1>
+      <input type="text" id="username" placeholder="यूज़रनेम" />
+      <input type="password" id="password" placeholder="पासवर्ड" />
+      <button onclick="verifyLogin()">लॉगिन करें</button>
+      <div class="output" id="loginMsg">कृपया अपना नाम और पासवर्ड दर्ज करें।</div>
+    </div>
+
+    <div id="mainContent">
+      <h1>🤖 Jarvis Assistant</h1>
+      <div class="output" id="output">कुछ कहें या कमांड टाइप करें...</div>
+      <input type="text" id="textCommand" placeholder="यहाँ कमांड लिखें..." />
+      <div class="button-group">
+        <button onclick="runCommand()">▶️ Run</button>
+        <button onclick="startListening()">🎤 Speak</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loginUsername = "achutam mishra";
+    const loginPassword = "20095";
+
+    const staticWeather = "हल्का बादल, तापमान 32 डिग्री सेल्सियस";
+    const staticNews = [
+      "भारत ने नई तकनीकी नीति लागू की है।",
+      "देश में डिजिटल शिक्षा को बढ़ावा देने के लिए नई योजना शुरू की गई है।",
+      "अंतरिक्ष में भारत का नया उपग्रह सफलतापूर्वक लॉन्च हुआ।",
+      "खेती में नई तकनीक से उत्पादकता बढ़ाने का प्रयास जारी है।",
+      "भारत और अन्य देशों के बीच व्यापार समझौता हुआ।",
+      "स्वास्थ्य क्षेत्र में नई दवाइयों के शोध को प्रोत्साहन मिल रहा है।",
+      "देश में स्वच्छ ऊर्जा परियोजनाओं पर निवेश बढ़ा।",
+      "खेल प्रतियोगिता में भारत ने स्वर्ण पदक जीता।",
+      "सार्वजनिक परिवहन में नई इलेक्ट्रिक बसें शुरू की गईं।",
+      "कृषि उत्पादों के निर्यात में वृद्धि दर्ज की गई।",
+      "देश में युवाओं के लिए स्टार्टअप योजना का शुभारंभ।"
+    ];
+
+    const staticJokes = [
+      "टीचर: बताओ, ‘हिम्मत’ का मतलब क्या होता है?\nछात्र: जो परीक्षा में पढ़ाई छोड़कर भी पास हो जाए!",
+      "पत्नी: आप मुझे कितना प्यार करते हो?\nपति: जितना तुम सोच भी नहीं सकती!",
+      "डॉक्टर: आप रोज़ व्यायाम करते हैं?\nमरीज: हाँ, रोज़ एक्सरसाइज ऐप खोलकर देखता हूँ!",
+      "पढ़ाई करते-करते छात्र बोला: मुझे समझ में नहीं आ रहा। दिमाग कहता है छोड़ दो, दिल कहता है पास हो जाओ!",
+      "मरीज: डॉक्टर साहब, मुझे भूलने की बीमारी हो गई है।\nडॉक्टर: कब से?\nमरीज: कब से क्या?",
+      "बॉस: तुम ऑफिस में देर से क्यों आए?\nकर्मचारी: ट्रैफिक था सर!\nबॉस: ट्रैफिक रोज़ होता है!\nकर्मचारी: तब तो रोज़ देर होनी चाहिए ना सर!",
+      "एक दोस्त: यार, शादी के बाद जीवन कैसा है?\nदूसरा दोस्त: जैसे किसी ऐप का फ्री ट्रायल खत्म हो गया हो!",
+      "टीचर: तुम क्लास में सो क्यों रहे हो?\nछात्र: ताकि सपना देख सकूँ कि मैं टॉपर बन गया हूँ!",
+      "पति: तुम रोज़ गुस्सा क्यों करती हो?\nपत्नी: ताकि तुम ध्यान दो कि मैं यहाँ हूँ!",
+      "डॉक्टर: चीनी कम खाइए।\nरोगी: जी डॉक्टर, मैं शुगर-फ्री बिस्कुट खा रहा हूँ।",
+      "मित्र: तुम इतना काम क्यों करते हो?\nदूसरा मित्र: ताकि आराम से सो सकूँ!"
+    ];
+
+    const greenTeaInfo = {
+      advantages: [
+        "ग्रीन टी एंटीऑक्सिडेंट से भरपूर है जो शरीर को मुक्त कणों से बचाता है।",
+        "यह मेटाबॉलिज्म बढ़ाकर वजन घटाने में मदद कर सकती है।",
+        "हृदय स्वास्थ्य को सुधारने में सहायक हो सकती है।",
+        "मस्तिष्क की कार्यक्षमता और ध्यान में सुधार ला सकती है।",
+        "प्रतिरक्षा प्रणाली को मजबूत करने में मदद कर सकती है।"
+      ],
+      disadvantages: [
+        "अधिक मात्रा में सेवन से नींद में बाधा आ सकती है।",
+        "अधिक कैफीन से बेचैनी या दिल की धड़कन बढ़ सकती है।",
+        "कुछ लोगों में एसिडिटी या पेट की समस्याएँ बढ़ सकती हैं।",
+        "आयरन अवशोषण में कमी कर सकती है।"
+      ]
+    };
+
+    let availableVoices = [];
+    let maleHindiVoice = null;
+    let voicesLoaded = false;
+
+    function loadVoices() {
+      availableVoices = speechSynthesis.getVoices();
+      maleHindiVoice = availableVoices.find(v => v.lang === "hi-IN" && v.name.toLowerCase().includes("male")) ||
+        availableVoices.find(v => v.lang === "hi-IN" && !v.name.toLowerCase().includes("female")) ||
+        availableVoices.find(v => v.lang === "hi-IN");
+      voicesLoaded = true;
+    }
+
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    setTimeout(loadVoices, 100);
+
+    function getMaleHindiVoice() {
+      if (!voicesLoaded) loadVoices();
+      return maleHindiVoice;
+    }
+
+    function speak(text) {
+      if (!voicesLoaded) {
+        loadVoices();
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "hi-IN";
+      const voice = getMaleHindiVoice();
+      if (voice) {
+        utterance.voice = voice;
+      }
+      utterance.pitch = 0.50;
+      utterance.rate = 1.10;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utterance);
+      output.textContent = "Jarvis: " + text;
+    }
+
+    function verifyLogin() {
+      const username = document.getElementById("username").value.trim().toLowerCase();
+      const password = document.getElementById("password").value.trim();
+      const loginMsg = document.getElementById("loginMsg");
+
+      if (username === loginUsername && password === loginPassword) {
+        document.getElementById("loginContent").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        speak("स्वागत है अच्युतम मिश्रा, आप लॉगिन हो चुके हैं।");
+      } else {
+        loginMsg.textContent = "गलत यूज़रनेम या पासवर्ड। कृपया पुनः प्रयास करें।";
+        speak("गलत जानकारी दी गई है।");
+      }
+    }
+
+    const output = document.getElementById("output");
+    const textCommand = document.getElementById("textCommand");
+
+    function runCommand() {
+      const command = textCommand.value.toLowerCase().trim();
+      handleCommand(command);
+      textCommand.value = "";
+    }
+
+    textCommand.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") runCommand();
+    });
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        speak("आपका ब्राउज़र वॉइस रिकग्निशन सपोर्ट नहीं करता है।");
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = "hi-IN";
+      recognition.onstart = () => {
+        output.textContent = "🎙️ सुन रहा हूँ...";
+      };
+      recognition.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.toLowerCase().trim();
+        output.textContent = "आपने कहा: " + spokenText;
+        handleCommand(spokenText);
+      };
+      recognition.onerror = () => {
+        speak("सुनने में त्रुटि हुई। कृपया दोबारा प्रयास करें।");
+      };
+      recognition.start();
+    }
+
+    function handleCommand(command) {
+      if (command.includes("open instagram")) {
+        const query = command.replace("open instagram", "").trim();
+        if (query.length > 0) {
+          speak(`इंस्टाग्राम पर ${query} के बारे में सोच रहा हूँ`);
+          window.open(`https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(query)}`, "_blank");
+        } else {
+          speak("इंस्टाग्राम खोल रहा हूँ");
+          window.open("https://www.instagram.com", "_blank");
+        }
+      } else if (command.includes("weather") || command.includes("मौसम")) {
+        speak("सिकर का मौसम है " + staticWeather);
+      } else if (command.includes("news") || command.includes("समाचार")) {
+        const news = staticNews[Math.floor(Math.random() * staticNews.length)];
+        speak("आज की खबर: " + news);
+      } else if (command.includes("joke") || command.includes("मज़ाक") || command.includes("हँसी")) {
+        const joke = staticJokes[Math.floor(Math.random() * staticJokes.length)];
+        speak(joke);
+      } else if (command.includes("green tea") || command.includes("ग्रीन टी")) {
+        let info = "ग्रीन टी के फायदे हैं:\n";
+        greenTeaInfo.advantages.forEach((adv, index) => {
+          info += `${index + 1}. ${adv}\n`;
+        });
+        info += "और कुछ नुकसान भी हो सकते हैं:\n";
+        greenTeaInfo.disadvantages.forEach((disadv, index) => {
+          info += `${index + 1}. ${disadv}\n`;
+        });
+        speak(info);
+      } else if (command.includes("open youtube")) {
+        const query = command.replace("open youtube", "").trim();
+        if (query.length > 0) {
+          const youtubeSearch = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+          speak(`यूट्यूब में ${query} के लिए सर्च कर रहा हूँ`);
+          window.open(youtubeSearch, "_blank");
+        } else {
+          speak("कृपया बताएं कि यूट्यूब में क्या सर्च करना है");
+        }
+      } else if (command.includes("open google")) {
+        const query = command.replace("open google", "").trim();
+        if (query.length > 0) {
+          const googleSearch = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+          speak(`गूगल में ${query} के लिए सर्च कर रहा हूँ`);
+          window.open(googleSearch, "_blank");
+        } else {
+          speak("कृपया बताएं कि गूगल में क्या सर्च करना है");
+        }
+      } else if (command.startsWith("solve")) {
+        try {
+          const expression = command.replace("solve", "").trim();
+          const result = eval(expression);
+          speak(`उत्तर है ${result}`);
+        } catch (error) {
+          speak("मुझे गणना करने में परेशानी हो रही है। कृपया सही गणितीय सवाल बताएं।");
+        }
+      } else if (command.includes("time")) {
+        const time = new Date().toLocaleTimeString("hi-IN");
+        speak("अभी का समय है " + time);
+      } else if (command.includes("तारीख") || command.includes("date")) {
+        const date = new Date().toLocaleDateString("hi-IN");
+        speak("आज की तारीख है " + date);
+      } else if (command.includes("owner father") || command.includes("पिता का नाम") || command.includes("father name")) {
+        speak("मेरे मालिक के पिताजी का नाम पंडित अश्विनी कुमार मिश्रा है।");
+      } else if (command.includes("owner mother") || command.includes("माँ का नाम") || command.includes("mother name") || command.includes("माता का नाम")) {
+        speak("मेरी मालिक की माताजी का नाम ममता मिश्रा है।");
+      } else if (command.includes("hello") || command.includes("नमस्ते") || command.includes("हैलो")) {
+        speak("नमस्ते! मैं आपकी क्या मदद कर सकता हूँ?");
+      } else if (command.includes("तुम्हारा नाम") || command.includes("your name")) {
+        speak("मेरा नाम जार्विस है।");
+      } else if (command.includes("where does your owner live") || command.includes("owner live in") || command.includes("मालिक कहाँ रहता है") || command.includes("मालिक कहाँ के हैं")) {
+        speak("मेरे मालिक भारत राजस्थान, सीकर में रहते हैं।");
+      } else if (command.includes("owner") || command.includes("मालिक")) {
+        speak("मेरे मालिक का नाम अच्युतम मिश्रा है। वह 16 वर्ष के हैं।");
+      } else if (command.includes("कैसे हो") || command.includes("how are you")) {
+        speak("मैं अच्छा हूँ, धन्यवाद! आप कैसे हैं?");
+      } else if (command.startsWith("remind me")) {
+        const reminder = command.replace("remind me", "").trim();
+        if (reminder.length > 0) {
+          speak(`ठीक है, मैं आपको याद दिलाऊँगा: ${reminder}`);
+        } else {
+          speak("कृपया बताइए कि आपको क्या याद दिलाना है।");
+        }
+      } else {
+        speak("माफ कीजिए, मैं समझ नहीं पाया।");
+      }
+    }
+  </script>
+</body>
+
+</html>
